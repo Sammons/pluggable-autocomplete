@@ -4,6 +4,7 @@
     "description": "Suggestions using data from custom plugins",
     "version": "0.0.1",
     "publisher": "Sammons",
+    "license": "MIT",
     "repository": {
         "type": "git",
         "url": "https://github.com/Sammons/pluggable-autocomplete.git"
