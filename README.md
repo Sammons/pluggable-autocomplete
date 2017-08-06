@@ -36,7 +36,7 @@ Yay first release!
 
 **Enjoy!**
 
-## License
+## License (MIT)
 
 Copyright 2017 Ben Sammons
 
