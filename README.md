@@ -8,7 +8,8 @@ This plugin lets you write .js files that fetch data into your built in list of 
 
 - Write custom data extractor and drop it into .pluggable-autocomplete in your workspace
 
-- [Use custom data!](sample.gif)
+- Use custom data
+![Use custom data!](sample.gif)
 
 
 
@@ -23,8 +24,9 @@ Maybe we could customize the plugin directory...?
 
 ## Known Issues
 
-no known issues yet! Open an issue on github.com/...
-security note; this invokes files in the
+- no known issues yet! Open an issue on https://github.com/Sammons/pluggable-autocomplete
+
+- Security note: this invokes files in the
 .pluggable-autocomplete folder, and as such they should
 be write-protected once you finish writing your plugin
 
