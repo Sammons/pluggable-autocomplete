@@ -13,55 +13,38 @@ import * as _ from "lodash";
 import * as fs from "fs";
 import * as path from "path";
 
-// const loadPlugins = (plugins: vscode.Uri[]) => {
-//   return plugins
-//     .map(p => {
-//       try {
-//         let loaded = require(p.fsPath) as {
-//           name: string;
-//           execute: (
-//             cb?: (error: string, results: string[]) => void
-//           ) => string[] | Promise<string[]> | null;
-//         };
-//         return {
-//           plugin: loaded,
-//           path: p.fsPath,
-//           name: AtPath(loaded, "name") || p.path
-//         };
-//       } catch (e) {
-//         vscode.window.showWarningMessage(
-//           `pluggable-autocomplete failed to load ${p.fsPath} ${e.message}`
-//         );
-//         return null;
-//       }
-//     })
-//     .filter(p => p != null);
-// };
-
-// const invokePlugin = async (selectedPlugin): Promise<string[]> => {
-//   return new Promise<string[]>(async (resolve, reject) => {
-//     let called = false;
-//     let cb = (err, res) => {
-//       if (called) {
-//         return;
-//       }
-//       called = true;
-//       if (err) {
-//         reject(err);
-//       } else if (res) {
-//         resolve(res);
-//       }
-//     };
-//     try {
-//       let result = await selectedPlugin.plugin.execute(cb);
-//       if (result) {
-//         cb(null, result);
-//       }
-//     } catch (e) {
-//       cb(e, null);
-//     }
-//   });
-// };
+const InitFile = assetFile => {
+  let root = vscode.workspace.rootPath;
+  if (!root) {
+    return vscode.window.showInformationMessage(
+      `Please try this after opening a folder`
+    );
+  }
+  let fldrPath = path.join(root, `./.${C.project}`);
+  if (fs.existsSync(fldrPath)) {
+    let stat = fs.statSync(fldrPath);
+    if (!stat.isDirectory()) {
+      return vscode.window.showErrorMessage(
+        `${fldrPath} exists but is not a directory`
+      );
+    }
+  } else {
+    fs.mkdirSync(fldrPath);
+  }
+  let fileName = `${fldrPath}/${assetFile}`;
+  fs.writeFileSync(
+    fileName,
+    fs.readFileSync(path.join(__dirname, `../../assets/${assetFile}`))
+  );
+  return vscode.workspace.openTextDocument(fileName).then(doc => {
+    return vscode.window.showTextDocument(doc).then(editor => {
+      return editor.revealRange(
+        new vscode.Range(30, 0, 30, 0),
+        vscode.TextEditorRevealType.InCenter
+      );
+    });
+  });
+};
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -69,37 +52,13 @@ export async function activate(context: vscode.ExtensionContext) {
   console.log("activate");
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("pluggable-autocomplete.initialize", () => {
-      let root = vscode.workspace.rootPath;
-      if (!root) {
-        return vscode.window.showInformationMessage(
-          `Please try this after opening a folder`
-        );
-      }
-      let fldrPath = path.join(root, `./.${C.project}`);
-      if (fs.existsSync(fldrPath)) {
-        let stat = fs.statSync(fldrPath);
-        if (!stat.isDirectory()) {
-          return vscode.window.showErrorMessage(
-            `${fldrPath} exists but is not a directory`
-          );
-        }
-      } else {
-        fs.mkdirSync(fldrPath);
-      }
-      let fileName = `${fldrPath}/sample.js`;
-      fs.writeFileSync(
-        fileName,
-        fs.readFileSync(path.join(__dirname, "../../assets/sample.js"))
-      );
-      return vscode.workspace.openTextDocument(fileName).then(doc => {
-        return vscode.window.showTextDocument(doc).then((editor) => {
-            return editor.revealRange(
-                new vscode.Range(30, 0, 30, 0),
-                vscode.TextEditorRevealType.InCenter
-            );
-        })
-      });
+    vscode.commands.registerCommand(C.contribPostgres, () => {
+      return InitFile('postgres.js')
+    })
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(C.initialize, () => {
+      return InitFile('sample.js')
     })
   );
 

@@ -32,7 +32,11 @@ be write-protected once you finish writing your plugin
 
 ## Release Notes
 
-Yay first release!
+## [0.0.1]
+- Initial release
+
+## [0.0.3]
+- Add contrib for postgres columns
 
 **Enjoy!**
 

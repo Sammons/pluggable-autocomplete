@@ -17,14 +17,19 @@
     ],
     "activationEvents": [
         "*",
-        "onCommand:pluggable-autocomplete.initialize"
+        "onCommand:pluggable-autocomplete.initialize",
+        "onCommand:pluggable-autocomplete.contrib.postgres-columns"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "commands": [
             {
                 "command": "pluggable-autocomplete.initialize",
-                "title": "Create Sample Pluggable Autocomplete"
+                "title": "Create Sample plug"
+            },
+            {
+                "command": "pluggable-autocomplete.contrib.postgres-columns",
+                "title": "Create Contrib Postgres Columns plug"
             }
         ]
     },
