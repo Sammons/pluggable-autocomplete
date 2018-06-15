@@ -2,6 +2,8 @@ import { C } from "./constants";
 import { ErrorResult, ResolverPluginLoader } from "./resolverPluginLoader";
 import { ResolverPlugin, ResolutionElement } from "./types";
 import * as vscode from "vscode";
+import * as path from "path";
+import * as os from "os";
 import {
   CompletionItemProvider,
   TextDocument,
@@ -22,37 +24,55 @@ export class Resolver implements CompletionItemProvider {
     }
   ) {}
 
-  plugins: ResolverPlugin[] = [];
+  resolveFilePath(file: string) {
+    file = file.replace("~", os.homedir());
+    return path.resolve(file);
+  }
 
+  plugins: ResolverPlugin[] = [];
+  config: vscode.WorkspaceConfiguration;
   async initialize() {
     let selectionItems: vscode.CompletionList = new vscode.CompletionList();
-    let plugins = await new ResolverPluginLoader().loadPlugins(
-      this.params.context
-    );
+    this.config = vscode.workspace.getConfiguration("pluggableautocomplete");
+    const jsonFileConfig = this.config.get<string>("json", null);
+    if (jsonFileConfig) {
+      const jsonFilePath = this.resolveFilePath(jsonFileConfig);
+      console.log(`Turning on json mode, looking in dir ${jsonFilePath}`);
+      this.plugins = [
+        await new ResolverPluginLoader().wrapJsonFile(
+          this.params.context,
+          jsonFilePath
+        )
+      ];
+    } else {
+      let plugins = await new ResolverPluginLoader().loadPlugins(
+        this.params.context
+      );
 
-    if (Array.isArray(plugins)) {
-      let isFailedPlugin = (plugin): plugin is ErrorResult =>
-        plugin.code != null;
-      let isNotFailedPlugin = (plugin): plugin is ResolverPlugin =>
-        plugin.code == null;
+      if (Array.isArray(plugins)) {
+        let isFailedPlugin = (plugin): plugin is ErrorResult =>
+          plugin.code != null;
+        let isNotFailedPlugin = (plugin): plugin is ResolverPlugin =>
+          plugin.code == null;
 
-      let errorPlugins = plugins.filter(isFailedPlugin);
-      errorPlugins.forEach(errorPlug => {
-        vscode.window.showInformationMessage(
-          `Plugin Load Error ${errorPlug.code} ${errorPlug.error}`
-        );
-      });
+        let errorPlugins = plugins.filter(isFailedPlugin);
+        errorPlugins.forEach(errorPlug => {
+          vscode.window.showInformationMessage(
+            `Plugin Load Error ${errorPlug.code} ${errorPlug.error}`
+          );
+        });
 
-      let successPlugins = plugins.filter(isNotFailedPlugin);
-      if (successPlugins.length === 0) {
-        return vscode.window.showInformationMessage(
-          `No plugins found. Try running "Create Sample Pluggable Autocomplete" to make one.`
-        );
-      } else {
-        this.plugins = successPlugins;
+        let successPlugins = plugins.filter(isNotFailedPlugin);
+        if (successPlugins.length === 0) {
+          return vscode.window.showInformationMessage(
+            `No plugins found. Try running "Create Sample Pluggable Autocomplete" to make one.`
+          );
+        } else {
+          this.plugins = successPlugins;
+        }
+      } else if (plugins) {
+        return vscode.window.showErrorMessage(plugins.code);
       }
-    } else if (plugins) {
-      return vscode.window.showErrorMessage(plugins.code);
     }
   }
 
@@ -60,7 +80,13 @@ export class Resolver implements CompletionItemProvider {
     return this.initialize().then(() => {
       this.params.context.subscriptions.push(
         vscode.languages.registerCompletionItemProvider(
-          vscode.window.activeTextEditor.document.languageId,
+          { scheme: "file" },
+          this
+        )
+      );
+      this.params.context.subscriptions.push(
+        vscode.languages.registerCompletionItemProvider(
+          { scheme: "untitled" },
           this
         )
       );

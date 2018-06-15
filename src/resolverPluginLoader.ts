@@ -1,7 +1,9 @@
 import { C } from "./constants";
 import { StrEnum } from "./lib/helpers";
 import * as vscode from "vscode";
-import { ResolverPlugin } from "./types";
+import { ResolverPlugin, ResolutionElement } from "./types";
+import * as fs from "fs";
+import * as util from "util";
 
 const _errors = StrEnum(
   "NoWorkSpace",
@@ -20,7 +22,44 @@ export type ErrorResult = {
 export class ResolverPluginLoader {
   constructor() {}
   errors = _errors;
-
+  async wrapJsonFile(context: vscode.ExtensionContext, jsonFilePath: string) {
+    if (!fs.existsSync(jsonFilePath)) {
+      vscode.window.showErrorMessage(
+        `${jsonFilePath} does not exist, pluggable autocomplete cannot access it.`
+      );
+      return;
+    }
+    const contents: Buffer = await new Promise<Buffer>((resolve, reject) => {
+      return fs.readFile(jsonFilePath, (err, data) => {
+        if (err) {
+          return reject(err);
+        } else {
+          return resolve(data);
+        }
+      });
+    });
+    try {
+      const resolution = JSON.parse(contents.toString("utf8"));
+      if (!Array.isArray(resolution.items)) {
+        vscode.window.showErrorMessage(`Missing key .items in json definition: ${jsonFilePath}`);
+        return;
+      }
+      if (resolution.name == null) {
+        vscode.window.showErrorMessage(`Missing key .name in json definition: ${jsonFilePath}`)
+        return;
+      }
+      class AnonJsonResolver implements ResolverPlugin {
+        constructor() {}
+        name = resolution.name;
+        resolveItems = () => resolution.items;
+      }
+      return new AnonJsonResolver() as ResolverPlugin
+    } catch (e) {
+      vscode.window.showErrorMessage(
+        `Failed to parse pluggable autocomplete file: ${e.message}`
+      );
+    }
+  }
   async loadPlugins(
     context: vscode.ExtensionContext
   ): Promise<((ErrorResult | ResolverPlugin)[]) | ErrorResult> {

@@ -22,14 +22,27 @@
     ],
     "main": "./out/src/extension",
     "contributes": {
+        "configuration":[
+            {
+                "title": "Pluggable Autocomplete",
+                "properties": {
+                    "pluggableautocomplete.json": {
+                        "type": "string",
+                        "default": "~/plugs.json",
+                        "description": "Path to json file defining completions",
+                        "scope": "resource"
+                    }
+                }
+            }
+        ],
         "commands": [
             {
                 "command": "pluggable-autocomplete.initialize",
-                "title": "Create Sample plug"
+                "title": "Pluggable Autocomplete: Create Sample plugin"
             },
             {
                 "command": "pluggable-autocomplete.contrib.postgres-columns",
-                "title": "Create Contrib Postgres Columns plug"
+                "title": "Pluggable Autocomplete: Create Contrib Postgres Columns plugin"
             }
         ]
     },
@@ -40,15 +53,15 @@
         "test": "node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "typescript": "^2.0.3",
-        "vscode": "^1.0.0",
-        "mocha": "^2.3.3",
+        "@types/mocha": "^2.2.32",
         "@types/node": "^6.0.40",
-        "@types/mocha": "^2.2.32"
+        "mocha": "^5.2.0",
+        "typescript": "^2.0.3",
+        "vscode": "^1.1.18"
     },
     "dependencies": {
         "@types/lodash": "^4.14.71",
-        "lodash": "^4.17.4",
+        "lodash": "^4.17.10",
         "source-map-support": "^0.4.15"
     }
 }

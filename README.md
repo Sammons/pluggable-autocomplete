@@ -6,12 +6,27 @@ This plugin lets you write .js files that fetch data into your built in list of 
 
 ## Features
 
+- Read completion values from a json file
+
+  in your settings set "pluggableautocomplete.json" to a filepath and ensure the file is formatted correctly:
+  ```json
+  {
+    "name": "whatever you put here globally prefixes all completions", // can be ""
+    "items": [{
+      "prefix": "", // optional: prefixes what you see, goes after name
+      "value": "", // required: the thing that actually gets put into the document when you select it,
+      "comment": "", // optional: describes the value, appears as a comment
+      "sortToken": "" // optional: instead of sorting by the "value", sort by this text. sorts as strings, not as numbers
+    }] // the file is slurped upon activation. do not make the file too big, preferably kilobytes to only a few megabytes.
+  }
+  ```
+
+  note that ~ is supporting in file paths, but was only tested on a linux system.
+
 - Write custom data extractor and drop it into .pluggable-autocomplete in your workspace
 
 - Use custom data
 ![Use custom data!](sample.gif)
-
-
 
 ## Requirements
 
@@ -37,6 +52,9 @@ be write-protected once you finish writing your plugin
 
 ## [0.0.3]
 - Add contrib for postgres columns
+
+## [0.1.0]
+- Add json file support, support for more file types
 
 **Enjoy!**
 
