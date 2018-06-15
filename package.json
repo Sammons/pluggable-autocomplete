@@ -2,7 +2,7 @@
     "name": "pluggable-autocomplete",
     "displayName": "pluggable-autocomplete",
     "description": "Suggestions using data from custom plugins",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "publisher": "Sammons",
     "license": "MIT",
     "repository": {
