@@ -9,7 +9,7 @@ This plugin lets you write .js files that fetch data into your built in list of 
 - Read completion values from a json file
 
   in your settings set "pluggableautocomplete.json" to a filepath and ensure the file is formatted correctly:
-  ```json
+  ```js
   {
     "name": "whatever you put here globally prefixes all completions", // can be ""
     "items": [{
