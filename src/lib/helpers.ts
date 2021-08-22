@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 export const Strictly = <T extends { [k: string]: S }, S extends string>(
   o: T
 ) => o as T;
