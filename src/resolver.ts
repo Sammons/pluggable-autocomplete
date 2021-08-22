@@ -4,6 +4,7 @@ import { ResolverPlugin, ResolutionElement } from "./types";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as os from "os";
+import * as fs from 'fs';
 import {
   CompletionItemProvider,
   TextDocument,
@@ -32,17 +33,20 @@ export class Resolver implements CompletionItemProvider {
   plugins: ResolverPlugin[] = [];
   config: vscode.WorkspaceConfiguration;
   async initialize() {
-    let selectionItems: vscode.CompletionList = new vscode.CompletionList();
+    // let selectionItems: vscode.CompletionList = new vscode.CompletionList();
     this.config = vscode.workspace.getConfiguration("pluggableautocomplete");
     const jsonFileConfig = this.config.get<string>("json", null);
     if (jsonFileConfig) {
       const jsonFilePath = this.resolveFilePath(jsonFileConfig);
-      console.log(`Turning on json mode, looking in dir ${jsonFilePath}`);
+      console.log(`Turning on json mode, looking for file ${jsonFilePath}`);
+      if (!fs.existsSync(jsonFilePath)) {
+        console.warn(`File ${jsonFilePath} does not exist, this may cause the plugin to do nothing.`)
+      }
       this.plugins = [
-        await new ResolverPluginLoader().wrapJsonFile(
+        ...(await new ResolverPluginLoader().createPluginsFromJSON(
           this.params.context,
           jsonFilePath
-        )
+        ))
       ];
     } else {
       let plugins = await new ResolverPluginLoader().loadPlugins(
@@ -116,8 +120,7 @@ export class Resolver implements CompletionItemProvider {
             let items = await resolvedElements.items;
             return items.map(element =>
               PluginElementMapper.externalToInternal(
-                element,
-                resolvedElements.pluginName
+                element
               )
             );
           })

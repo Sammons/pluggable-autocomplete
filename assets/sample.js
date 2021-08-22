@@ -1,12 +1,3 @@
-
-/**
- * bluebird is an A+ promise library, 
- * you will need to npm install in this 
- * project to use it; it is not mandatory to use the
- * pluggable-autocomplete plugin
- */
-var bluebird = require('bluebird');
-
 /**
  * This is a sample file for pluggable-autocomplete,
  * if you just generated it you will need to RELOAD THE WINDOW
@@ -32,7 +23,7 @@ exports.name = 'Sample';
  *   when shouldStopEarly() returns true, the value will be discarded
  */
 exports.resolveItems = (shouldStopEarly) => {
-    return bluebird.delay(1000).thenReturn([
+    return Promise.resolve([
         { value: 'SampleA' },
         { value: 'SampleB', comment: 'Its the second sample' },
         { value: 'SampleC' },

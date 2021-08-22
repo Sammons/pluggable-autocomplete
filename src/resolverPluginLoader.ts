@@ -22,7 +22,7 @@ export type ErrorResult = {
 export class ResolverPluginLoader {
   constructor() {}
   errors = _errors;
-  async wrapJsonFile(context: vscode.ExtensionContext, jsonFilePath: string) {
+  async createPluginsFromJSON(context: vscode.ExtensionContext, jsonFilePath: string) {
     if (!fs.existsSync(jsonFilePath)) {
       vscode.window.showErrorMessage(
         `${jsonFilePath} does not exist, pluggable autocomplete cannot access it.`
@@ -39,21 +39,34 @@ export class ResolverPluginLoader {
       });
     });
     try {
-      const resolution = JSON.parse(contents.toString("utf8"));
+      const resolution: {
+        items: ResolutionElement[]
+      } = JSON.parse(contents.toString("utf8"));
       if (!Array.isArray(resolution.items)) {
         vscode.window.showErrorMessage(`Missing key .items in json definition: ${jsonFilePath}`);
-        return;
+        return [];
       }
-      if (resolution.name == null) {
-        vscode.window.showErrorMessage(`Missing key .name in json definition: ${jsonFilePath}`)
-        return;
-      }
-      class AnonJsonResolver implements ResolverPlugin {
-        constructor() {}
-        name = resolution.name;
-        resolveItems = () => resolution.items;
-      }
-      return new AnonJsonResolver() as ResolverPlugin
+      const itemsByPrefix = {} as {
+        [name: string]: ResolutionElement[];
+      };
+      resolution.items.forEach(item => {
+        if (!itemsByPrefix[item.prefix || ""]) {
+          itemsByPrefix[item.prefix || ""] = [];
+        }
+        itemsByPrefix[item.prefix || ""].push({
+          comment: item.comment,
+          sortToken: item.sortToken,
+          prefix: item.prefix,
+          value: item.value
+        })
+      })
+
+      return Object.entries(itemsByPrefix).map(entry => {
+        return {
+          name: entry[0],
+          resolveItems: () => entry[1]
+        }
+      }) as ResolverPlugin[];
     } catch (e) {
       vscode.window.showErrorMessage(
         `Failed to parse pluggable autocomplete file: ${e.message}`

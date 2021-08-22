@@ -11,13 +11,13 @@ This plugin lets you write .js files that fetch data into your built in list of 
   in your settings set "pluggableautocomplete.json" to a filepath and ensure the file is formatted correctly:
   ```js
   {
-    "name": "whatever you put here globally prefixes all completions", // can be ""
     "items": [{
-      "prefix": "", // optional: prefixes what you see, goes after name
-      "value": "", // required: the thing that actually gets put into the document when you select it,
+      "prefix": "", // optional: appears like e.g. "prefixvalue"
+      "value": "", // required
       "comment": "", // optional: describes the value, appears as a comment
       "sortToken": "" // optional: instead of sorting by the "value", sort by this text. sorts as strings, not as numbers
-    }] // the file is slurped upon activation. do not make the file too big, preferably kilobytes to only a few megabytes.
+    }] 
+    // the file is slurped upon activation. do not make the file too big, preferably kilobytes to only a few megabytes.
   }
   ```
 
@@ -56,11 +56,16 @@ be write-protected once you finish writing your plugin
 ## [0.1.0]
 - Add json file support, support for more file types
 
+## [1.0.0]
+- Remove the name top level value.
+- Stop separating prefix and value with "." (instead you should do "prefix." if you want that)
+- Include the prefix in the completion.
+
 **Enjoy!**
 
 ## License (MIT)
 
-Copyright 2017 Ben Sammons
+Copyright 2021 Ben Sammons
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

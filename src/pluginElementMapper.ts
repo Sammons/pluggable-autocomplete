@@ -2,7 +2,6 @@ import { InternalResolutionElement, ResolutionElement } from "./types";
 import { CompletionItem, CompletionItemKind } from "vscode";
 
 export const PluginElementMapper = new class {
-  private maybePrefix = (v: string) => (v ? v + "." : "");
   internalToExternal = (ie: InternalResolutionElement): ResolutionElement => {
     return {
       comment: ie.comment,
@@ -12,21 +11,17 @@ export const PluginElementMapper = new class {
     };
   };
   externalToInternal = (
-    e: ResolutionElement,
-    pluginName: string
+    e: ResolutionElement
   ): InternalResolutionElement => {
+    const value = `${e.prefix || ""}${e.value}`;
     return {
-      pluginName: pluginName || null,
+      pluginName: e.prefix || null,
       comment: e.comment || null,
       prefix: e.prefix || null,
-      sortToken: e.sortToken || e.value,
-      value: e.value,
-      label: `${this.maybePrefix(pluginName)}${this.maybePrefix(
-        e.prefix
-      )}${e.value}`,
-      filterText: `${this.maybePrefix(pluginName)}${this.maybePrefix(
-        e.prefix
-      )}${e.value}`
+      sortToken: e.sortToken || value,
+      value: value,
+      label: value,
+      filterText: value
     };
   };
   internalToCompletionItem = (
@@ -35,15 +30,16 @@ export const PluginElementMapper = new class {
   ) => {
     let item =
       mutateItem || new CompletionItem(ie.label, CompletionItemKind.Value);
-    item.documentation = ie.comment;
+    item.detail = ie.comment  ? ie.comment.substr(0, 25) : null;
+    item.documentation = ie.comment && ie.comment.length > 25 ? "..." + ie.comment.substr(25) : null;
     item.sortText = ie.sortToken;
     item.insertText = ie.value;
     item.label = ie.label;
     item.filterText = ie.filterText;
     return item;
   };
-  externalToCompletionItem = (e: ResolutionElement, pluginName: string) => {
-    let internal = this.externalToInternal(e, pluginName);
+  externalToCompletionItem = (e: ResolutionElement) => {
+    let internal = this.externalToInternal(e);
     return this.internalToCompletionItem(internal);
   };
 }();

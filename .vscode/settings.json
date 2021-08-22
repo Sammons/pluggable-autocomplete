@@ -7,5 +7,8 @@
         "out": true // set this to false to include "out" folder in search results
     },
     "editor.renderWhitespace": "all",
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "pluggableautocomplete": {
+        "json": "plug.json"
+    }
 }
